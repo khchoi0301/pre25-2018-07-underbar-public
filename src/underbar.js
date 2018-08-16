@@ -38,6 +38,10 @@
   // Like first, but for the last elements. If n is undefined, return just the
   // last element.
   _.last = function(array, n) {
+    if(n === 0 ){
+      return [];
+    }
+    return n === undefined ? array[array.length-1] : array.slice(-n,array.length)
   };
 
   // Call iterator(value, key, collection) for each element of collection.
@@ -46,14 +50,35 @@
   // Note: _.each does not have a return value, but rather simply runs the
   // iterator function over each item in the input collection.
   _.each = function(collection, iterator) {
-  };
+    if(Array.isArray(collection)){
+      for(var i=0;i<collection.length;i++){
+        iterator(collection[i],i,collection)
+      }
+    } else {    
+      for (var key in collection){
+        iterator(collection[key],key,collection);
+      }
+    }
+  };   // 왜 어레이와 오브젝트를 구분하는지?? 오브젝트하면 범용적으로 될거 같은데, 따로 리턴은 하지않음
 
   // Returns the index at which value can be found in the array, or -1 if value
   // is not present in the array.
   _.indexOf = function(array, target) {
+
+   /*
+    var result = _.each(array,function(value,index,arr){
+      if (value === target ) {
+        return index;
+      }
+      console.log("not the same",arr,index,value);
+    })
+
+    return result;      //리턴은 왜 안되는 지
+  */  
     // TIP: Here's an example of a function that needs to iterate, which we've
     // implemented for you. Instead of using a standard `for` loop, though,
     // it uses the iteration helper `each`, which you will need to write.
+    
     var result = -1;
 
     _.each(array, function(item, index) {
@@ -63,25 +88,94 @@
     });
 
     return result;
+    
   };
 
   // Return all elements of an array that pass a truth test.
+
+
   _.filter = function(collection, test) {
+    var newArr=[];
+      
+    _.each(collection,function(item){
+      if(test(item)){
+        newArr.push(item);
+      }
+    })
+    /*
+    for(var i=0;i<collection.length;i++){
+      if(test(collection[i])){
+        newArr.push(collection[i])
+      }
+    }
+    */
+    return newArr;
+    
   };
 
   // Return all elements of an array that don't pass a truth test.
   _.reject = function(collection, test) {
+    return _.filter(collection,test)  
+
     // TIP: see if you can re-use _.filter() here, without simply
     // copying code in and modifying it
+   /*
+    var newArr=[];      
+    _.each(collection,function(item){
+      if(!test(item)){
+        newArr.push(item);
+      }
+    })
+    return newArr;
+    */
   };
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array) {
+    var newArr=[array[0]];
+
+    for(var i=0;i<array.length;i++){
+      if( _.indexOf(newArr,array[i]) === -1 ){
+        newArr.push(array[i]);
+      }
+    }
+
+    /*
+    for(var j=1;j<array.length;j++){
+      var isSame=0;
+      for(var i=0;i<j;i++){
+        if( array[j] === array[i]){
+          isSame =1
+          console.log("same:",i,j,'value:',array[i])
+        }
+        console.log(array,i,j,newArr);
+      }
+      if(!isSame){
+        newArr.push(array[j])
+      }
+    }
+    */
+    return newArr;
   };
 
 
   // Return the results of applying an iterator to each element.
   _.map = function(collection, iterator) {
+
+    if(Array.isArray(collection)){
+      var arr=[]
+      for(var i=0;i<collection.length;i++){
+        console.log(iterator(collection[i]),collection)
+        arr.push(iterator(collection[i]))
+        console.log(arr)
+      }
+      return arr;
+    } else {    
+      for (var key in collection){
+        iterator(collection[key],key,collection);
+      }
+    }
+   // _.each(collection,iterator)
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
