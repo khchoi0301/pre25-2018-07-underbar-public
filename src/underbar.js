@@ -228,27 +228,37 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
-   // _.each(collection,iterator)
-  
-   
     
-    for(var i=0;i<collection.length;i++){
-      console.log(collection,i,':',collection[i],accumulator)
-      if(accumulator!==undefined){
-        accumulator=iterator(accumulator,collection[i],i,collection);
-        //accumulator = iterator(accumulator, item)
-      } else {
-        accumulator= collection[0];
-      }     
-      console.log(collection,i,':',collection[i],accumulator)
-    } return accumulator
+
+
+
+    var startNum = 0
+
+    if(accumulator === undefined){
+      accumulator = collection[0];
+      startNum++;
+    }
     
+    _.each(collection,function(item, key){
+      if(!startNum||key!==0){
+      accumulator=iterator(accumulator,item,key,collection);
+      }
+    })
+    
+    /*
+    for(var i=startNum;i<collection.length;i++){
+      accumulator=iterator(accumulator,collection[i],i,collection);
+    }
+    */
+    return accumulator
   };
 
   // Determine if the array or object contains a given value (using `===`).
   _.contains = function(collection, target) {
     // TIP: Many iteration problems can be most easily expressed in
     // terms of reduce(). Here's a freebie to demonstrate!
+  
+
     return _.reduce(collection, function(wasFound, item) {
       if (wasFound) {
         return true;
@@ -261,6 +271,14 @@
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    return _.reduce(collection,function(accumulator,item,i){
+      if (!accumulator) {
+        console.log(accumulator,item,i,collection,"con");
+        return false; 
+      } 
+      console.log(accumulator,item,i,collection);
+      return iterator(i)
+    },true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
