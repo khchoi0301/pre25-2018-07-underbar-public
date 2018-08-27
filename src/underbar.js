@@ -115,7 +115,10 @@
 
   // Return all elements of an array that don't pass a truth test.
   _.reject = function(collection, test) {
-    return _.filter(collection,test)  
+
+    return _.filter(collection,function(item){
+      return !test(item)
+    })  
 
     // TIP: see if you can re-use _.filter() here, without simply
     // copying code in and modifying it
@@ -227,10 +230,7 @@
   //     return total + number * number;
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
-  _.reduce = function(collection, iterator, accumulator) {
-    
-
-
+  _.reduce = function(collection, iterator, accumulator) {  
 
     var startNum = 0
 
@@ -273,17 +273,48 @@
     // TIP: Try re-using reduce() here.
     return _.reduce(collection,function(accumulator,item,i){
       if (!accumulator) {
-        console.log(accumulator,item,i,collection,"con");
+        //console.log(accumulator,item,i,collection,"con");
         return false; 
       } 
-      console.log(accumulator,item,i,collection);
-      return iterator(i)
+      if (iterator==undefined) {
+        return item==1;
+      }
+
+      //console.log(accumulator,item,i,collection,iterator(item),iterator);
+      return !!iterator(item);
     },true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
+   // return 
+   //  console.log(_.every(collection,iterator),_.every(!collection,!iterator()),_.every(collection,iterator) || _.every(!collection,iterator),collection)
+  /*
+    if(_.every(collection,iterator)){
+      //  console.log(_.every(collection,iterator),collection)
+      return true;
+    }*/
+    /*
+    console.log(_.every(collection,iterator),
+    //!_.every(collection,iterator),
+    //_.every(!collection,iterator()),
+    //!_.every(!collection,iterator()),
+    _.every(collection,function(is,item){
+      iterator(is,item)
+    }),
+    _.every(collection,function(is,item){
+      iterator(!is,item)
+    }),
+    _.every(collection,function(is,item){
+      !iterator(is,!item)
+    }),
+    collection,'f')
+   /*
+     return (_.every(collection,function(accumulator,item){
+      console.log(!!iterator(accumulator,item),iterator(accumulator,!item),!iterator(!accumulator,item),collection)
+       return !!iterator(item)
+     }))*/
     // TIP: There's a very clever way to re-use every() here.
   };
 
@@ -307,11 +338,37 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    var result={};
+
+    for(var i=0;i<arguments.length;i++){
+      for(var key in arguments[i]){      
+        result[key]=arguments[i][key]        
+      }        
+    }
+
+    return result;        
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    console.log(arguments,arguments[0],arguments[1])
+    var arr=Array.prototype.slice.call(arguments)//Array.from(arguments);
+    //var result={};
+    console.log(arr,arr[0],arr[1]);
+    
+    for(var i=0;i<arr.length;i++){
+      for(var key in arr[i]){
+        if(!(key in arr[0])){
+          //result[key]=arr[i][key];
+          arguments[0][key]=arr[i][key];
+        }
+      }
+    }
+    //arr[0]=result;
+    //arguments[0]=result;    
+    //console.log(arguments[0]);
+    //return arr[0]; 
   };
 
 
