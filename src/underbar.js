@@ -269,6 +269,34 @@
 
 
   // Determine whether all of the elements match a truth test.
+/*
+  _.every = function(collection, iterator,acc) {
+    // TIP: Try re-using reduce() here.
+    var accByfunc; //every, some에따라 accumulation를 사용
+    return _.reduce(collection,function(accumulator,item,i){
+      
+      (acc==undefined)? accByfunc=!accumulator : accByfunc=accumulator 
+
+      if (accByfunc) {
+        //console.log(accumulator,item,i,collection,"con");
+        return !!acc; 
+      } 
+      if (iterator==undefined) {
+        return item==1;
+      }
+      //console.log(accumulator,item,i,collection,iterator(item),iterator);
+      return !!iterator(item);
+    },!acc);
+  };
+  
+  // Determine whether any of the elements pass a truth test. If no iterator is
+  // provided, provide a default one
+
+  _.some = function(collection, iterator) {
+    return _.every(collection,iterator,true);  
+  };
+*/
+ 
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
     return _.reduce(collection,function(accumulator,item,i){
@@ -279,44 +307,35 @@
       if (iterator==undefined) {
         return item==1;
       }
-
       //console.log(accumulator,item,i,collection,iterator(item),iterator);
       return !!iterator(item);
     },true);
   };
 
-  // Determine whether any of the elements pass a truth test. If no iterator is
-  // provided, provide a default one
-  _.some = function(collection, iterator) {
-   // return 
-   //  console.log(_.every(collection,iterator),_.every(!collection,!iterator()),_.every(collection,iterator) || _.every(!collection,iterator),collection)
-  /*
-    if(_.every(collection,iterator)){
-      //  console.log(_.every(collection,iterator),collection)
-      return true;
-    }*/
+  _.some = function(collection, iterator) {    
+    if(typeof(iterator)!=='function'){
+      iterator=function(v){
+        return v;
+      }
+    }
+    
+    return !(_.every(collection,function(v){      
+      return !iterator(v);   
+    }))
     /*
-    console.log(_.every(collection,iterator),
-    //!_.every(collection,iterator),
-    //_.every(!collection,iterator()),
-    //!_.every(!collection,iterator()),
-    _.every(collection,function(is,item){
-      iterator(is,item)
-    }),
-    _.every(collection,function(is,item){
-      iterator(!is,item)
-    }),
-    _.every(collection,function(is,item){
-      !iterator(is,!item)
-    }),
-    collection,'f')
-   /*
-     return (_.every(collection,function(accumulator,item){
-      console.log(!!iterator(accumulator,item),iterator(accumulator,!item),!iterator(!accumulator,item),collection)
-       return !!iterator(item)
-     }))*/
+    return _.reduce(collection,function(accumulator,item,i){      
+      if (accumulator) {
+        return true; 
+      } 
+      if (iterator==undefined) {
+        return item==1;
+      }
+      return !!iterator(item);
+    },false);   
+    */ 
     // TIP: There's a very clever way to re-use every() here.
   };
+  
 
 
   /**
@@ -338,7 +357,8 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
-    var result={};
+    //var result={};
+    var result=arguments[0];
 
     for(var i=0;i<arguments.length;i++){
       for(var key in arguments[i]){      
@@ -352,23 +372,23 @@
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
-    console.log(arguments,arguments[0],arguments[1])
-    var arr=Array.prototype.slice.call(arguments)//Array.from(arguments);
-    //var result={};
-    console.log(arr,arr[0],arr[1]);
     
+    var arr=Array.prototype.slice.call(arguments)//Array.from(arguments);
+    var result=arguments[0];  
+
     for(var i=0;i<arr.length;i++){
       for(var key in arr[i]){
-        if(!(key in arr[0])){
-          //result[key]=arr[i][key];
-          arguments[0][key]=arr[i][key];
+        if(!(key in arr[0])){          
+          result[key]=arr[i][key];
+          
         }
       }
     }
     //arr[0]=result;
     //arguments[0]=result;    
     //console.log(arguments[0]);
-    //return arr[0]; 
+    return result; 
+    
   };
 
 
@@ -412,6 +432,26 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+
+    var caches={};
+    
+    return function(){
+      var arg = Array.prototype.slice.call(arguments)
+      var stringArg = JSON.stringify(arg);
+
+      console.log(arg,stringArg,caches,caches[arg])
+      if(!(stringArg in caches)){
+        var result = func.apply(this,arg);
+        caches[stringArg]=result;
+        console.log('first',arg,caches,caches[arguments])
+        return result;
+      } else {
+        console.log('memoize',arg,caches,caches[arguments])
+        return caches[stringArg]
+      }
+    }
+    
+
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -420,8 +460,30 @@
   // The arguments for the original function are passed after the wait
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
-  _.delay = function(func, wait) {
-  };
+  _.delay = function(func, wait,a,b) {
+    //var arg = Array.prototype.slice.call(arguments,2)
+    
+    return setTimeout.apply(this,arguments);
+
+    /*
+    setTimeout(function(x){
+      return func(x);
+    },wait,a,b)
+    */
+  
+    /*
+    setTimeout(function(){
+      //return func.apply(null,arg);
+      return func.apply(this,arg);
+    },wait)
+    */
+  };   
+
+
+
+  
+  
+  // How to use arguments to handle 3 or more parameter
 
 
   /**
@@ -435,6 +497,18 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    var cpdArr = array.slice(0)
+    var shuffledArr = [];
+    var k=Math.trunc(Math.random() * (cpdArr.length)); 
+    
+    while(cpdArr.length !== 0){
+      shuffledArr.push(cpdArr[k]);
+      cpdArr.splice(k,1);    
+      //console.log('lengh:',cpdArr.length,'k:',k)    
+      k=Math.trunc(Math.random() * (cpdArr.length));
+    }
+    //console.log(cpdArr,shuffledArr);
+    return shuffledArr
   };
 
 
